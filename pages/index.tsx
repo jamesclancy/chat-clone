@@ -12,51 +12,108 @@ interface ILeftMenuLinkItemProps {
   clickAction?: () => void;
   name: string;
   active: boolean;
+  keyPrefix?: string;
+  icon?: "GreenCircle" | "GrayCircle";
 }
 
-interface ILeftMenuSection {
+interface ILeftMenuSectionProps {
   items: ILeftMenuLinkItemProps[];
   name: string;
   expanded: boolean;
 }
 
 const LeftMenuItem = (props: ILeftMenuLinkItemProps) => {
-  return <li>{props.name}</li>;
+  const MenuItemIcon = () => {
+    switch (props.icon) {
+      case "GreenCircle":
+        return (
+          <span className="inline-block w-2 h-2 mr-2 bg-green-600 rounded-full"></span>
+        );
+      case "GrayCircle":
+        return (
+          <span className="inline-block w-2 h-2 mr-2 bg-slate-600 rounded-full"></span>
+        );
+    }
+    return <></>;
+  };
+
+  return (
+    <li>
+      <MenuItemIcon />
+      {props.name}
+    </li>
+  );
 };
 
-const LeftMenuSection = () => {
+const LeftMenuSection = (props: ILeftMenuSectionProps) => {
   return (
     <div className="py-3">
-      <div className="flex flex-row">
-        <div className="w-5">
-          <ChevronDownIcon className="h-4 w-4 text-slate-500" />
+      {props.name && (
+        <div className="flex flex-row">
+          <div className="w-5">
+            {props.expanded ? (
+              <ChevronDownIcon className="h-4 w-4 text-slate-500" />
+            ) : (
+              <ChevronUpIcon className="h-4 w-4 text-slate-500" />
+            )}
+          </div>
+          <div className="flex-grow">
+            <h2>{props.name}</h2>
+          </div>
+          <div className="w-5">
+            <PlusCircleIcon className="h-4 w-4 text-slate-500" />
+          </div>
         </div>
-        <div className="flex-grow">
-          <h2>Direct Messages</h2>
-        </div>
-        <div className="w-5">
-          <PlusCircleIcon className="h-4 w-4 text-slate-500" />
-        </div>
-      </div>
+      )}
       <ul>
-        <li>
-          <span className="inline-block w-2 h-2 mr-2 bg-green-600 rounded-full"></span>
-          random
-        </li>
-        <li>
-          <span className="inline-block w-2 h-2 mr-2 bg-slate-600 rounded-full"></span>
-          tailwinds
-        </li>
-        <li>
-          <span className="inline-block w-2 h-2 mr-2 bg-slate-600 rounded-full"></span>
-          testing
-        </li>
+        {props.expanded &&
+          props.items.map((item) => (
+            <div>
+              <LeftMenuItem {...item} />
+            </div>
+          ))}
       </ul>
     </div>
   );
 };
 
 const Home: NextPage = () => {
+  const panels: ILeftMenuSectionProps[] = [
+    {
+      items: [
+        { name: "Unread", active: false },
+        { name: "Threads", active: false },
+        { name: "Mentions", active: false },
+        { name: "Drafts", active: false },
+      ],
+      name: "",
+      expanded: true,
+    },
+    {
+      items: [
+        { name: "#random", active: false },
+        { name: "#tailwinds", active: false },
+        { name: "#testing", active: false },
+      ],
+      name: "Channels",
+      expanded: true,
+    },
+    {
+      items: [{ name: "#my-channel", active: false }],
+      name: "Some Customer Folder",
+      expanded: false,
+    },
+    {
+      items: [
+        { name: "James", active: false, icon: "GreenCircle" },
+        { name: "Tailwinds", active: false, icon: "GrayCircle" },
+        { name: "Testing", active: false, icon: "GrayCircle" },
+      ],
+      name: "Direct Messages",
+      expanded: true,
+    },
+  ];
+
   return (
     <>
       <div className="lg:flex xl:flex-row">
@@ -66,69 +123,9 @@ const Home: NextPage = () => {
               <span className="inline-block w-2 h-2 mr-2 bg-green-600 rounded-full"></span>
               Your Name
             </div>
-            <div className="py-3">
-              <ul>
-                <li>Unread</li>
-                <li>Threads</li>
-                <li>Mentions</li>
-                <li>Drafts</li>
-              </ul>
-            </div>
-            <div className="py-3">
-              <div className="flex flex-row">
-                <div className="w-5">
-                  <ChevronDownIcon className="h-4 w-4 text-slate-500" />
-                </div>
-                <div className="flex-grow">
-                  <h2>Channels</h2>
-                </div>
-                <div className="w-5">
-                  <PlusCircleIcon className="h-4 w-4 text-slate-500" />
-                </div>
-              </div>
-              <ul>
-                <li>#random</li>
-                <li>#tailwinds</li>
-                <li>#testing</li>
-              </ul>
-            </div>
-            <div className="py-3">
-              <div className="flex flex-row">
-                <div className="w-5">
-                  <ChevronUpIcon className="h-4 w-4 text-slate-500" />
-                </div>
-                <div className="flex-grow">
-                  <h2>Some Custom Folder</h2>
-                </div>
-              </div>
-            </div>
-            <div className="py-3">
-              <div className="flex flex-row">
-                <div className="w-5">
-                  <ChevronDownIcon className="h-4 w-4 text-slate-500" />
-                </div>
-                <div className="flex-grow">
-                  <h2>Direct Messages</h2>
-                </div>
-                <div className="w-5">
-                  <PlusCircleIcon className="h-4 w-4 text-slate-500" />
-                </div>
-              </div>
-              <ul>
-                <li>
-                  <span className="inline-block w-2 h-2 mr-2 bg-green-600 rounded-full"></span>
-                  random
-                </li>
-                <li>
-                  <span className="inline-block w-2 h-2 mr-2 bg-slate-600 rounded-full"></span>
-                  tailwinds
-                </li>
-                <li>
-                  <span className="inline-block w-2 h-2 mr-2 bg-slate-600 rounded-full"></span>
-                  testing
-                </li>
-              </ul>
-            </div>
+            {panels.map((panel) => (
+              <LeftMenuSection {...panel} />
+            ))}
           </div>
         </div>
         <div className="flex flex-grow">Main Content</div>
