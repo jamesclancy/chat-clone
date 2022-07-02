@@ -13,6 +13,7 @@ interface ILeftMenuLinkItemProps {
   name: string;
   active: boolean;
   keyPrefix?: string;
+  items?: number;
   icon?: "GreenCircle" | "GrayCircle";
 }
 
@@ -37,10 +38,21 @@ const LeftMenuItem = (props: ILeftMenuLinkItemProps) => {
     return <></>;
   };
 
+  const classes = props.active
+    ? "flex flex-row transform transition duration-400 hover:bg-emerald-200 py-1 font-bold"
+    : "flex flex-row transform transition duration-400 hover:bg-emerald-200 py-1";
+
   return (
     <li>
-      <MenuItemIcon />
-      {props.name}
+      <div className={classes}>
+        <div className="w-5">
+          <MenuItemIcon />
+        </div>
+        <div className="flex-grow">
+          {props.name} &nbsp;
+          {props.items && <span className="">({props.items})</span>}
+        </div>
+      </div>
     </li>
   );
 };
@@ -49,7 +61,7 @@ const LeftMenuSection = (props: ILeftMenuSectionProps) => {
   return (
     <div className="py-3">
       {props.name && (
-        <div className="flex flex-row">
+        <div className="flex flex-row font-sm font-bold shadow-md py-2">
           <div className="w-5">
             {props.expanded ? (
               <ChevronDownIcon className="h-4 w-4 text-slate-500" />
@@ -82,8 +94,8 @@ const Home: NextPage = () => {
     {
       items: [
         { name: "Unread", active: false },
-        { name: "Threads", active: false },
-        { name: "Mentions", active: false },
+        { name: "Threads", active: true },
+        { name: "Mentions", active: true, items: 10 },
         { name: "Drafts", active: false },
       ],
       name: "",
@@ -114,15 +126,26 @@ const Home: NextPage = () => {
     },
   ];
 
+  interface ILeftNavigationUserPanelProps {
+    userName: string;
+    status: "Away" | "Online";
+  }
+
+  const LeftNavigationUserPanel = (props: ILeftNavigationUserPanelProps) => {
+    return (
+      <div className="py-3">
+        <span className="inline-block w-2 h-2 mr-2 bg-green-600 rounded-full"></span>
+        Your Name
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="lg:flex xl:flex-row">
         <div className="lg:w-48 flex">
           <div className="lg:text-xs px-3 flex-grow">
-            <div className="py-3">
-              <span className="inline-block w-2 h-2 mr-2 bg-green-600 rounded-full"></span>
-              Your Name
-            </div>
+            <LeftNavigationUserPanel userName="James" status="Online" />
             {panels.map((panel) => (
               <LeftMenuSection {...panel} />
             ))}
