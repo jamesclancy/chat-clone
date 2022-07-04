@@ -1,15 +1,8 @@
 import {
-  CodeIcon,
-  LightningBoltIcon,
-  CloudUploadIcon,
-  PhotographIcon,
-} from "@heroicons/react/outline";
-import {
   IconAt,
   IconBlockquote,
   IconBold,
   IconCode,
-  IconFileCode,
   IconItalic,
   IconLego,
   IconLink,
@@ -22,6 +15,8 @@ import {
   IconStrikethrough,
   IconVideo,
 } from "@tabler/icons";
+import { useState } from "react";
+import { IMessageSenderProps } from "../../models/models";
 
 const Divider = () => {
   return <div className="mx-2 border-r-2 border-slate-300" />;
@@ -29,10 +24,23 @@ const Divider = () => {
 
 const MessageSenderIconContainer = (props: { name: string }) => {};
 
-const MessageSender = () => {
+interface IMessageSenderState {
+  currentMessage: string;
+  lastDraftSent: string;
+  lastDraftSentTime: Date;
+}
+
+const MessageSender = (props: IMessageSenderProps) => {
+  
+  const [state, setState] = useState<IMessageSenderState>({
+    currentMessage: props.draftContent,
+    lastDraftSent: props.draftContent,
+    lastDraftSentTime: new Date(Date.now())
+  } as IMessageSenderState);
+  
   return (
-    <div className="lg:h-56 flex py-2">
-      <div className="flex flex-col border-2 border-slate-300 rounded-xl flex-grow p-4">
+    <div className="flex py-2  mr-4">
+      <div className="flex flex-col border-2 border-slate-300 rounded-xl flex-grow p-4 min-h-full">
         <div className="flex flex-row  align-middle text-sm h-6">
           <div className="w-4 h-4 align-middle text-center" aria-label="Bold">
             <IconBold size={16} stroke={2} />
@@ -65,9 +73,9 @@ const MessageSender = () => {
         </div>
         <div className="flex flex-grow">
           <textarea
-            className="flex-grow text-xs py-4 resize-none"
-            placeholder="Message #random"
-          ></textarea>
+            className="flex-grow text-xs py-4 resize-none h-24"
+            placeholder={props.placeHolderText}
+          >{state.currentMessage}</textarea>
         </div>
         <div className="flex flex-row  align-middle text-sm h-6">
           <div className="flex-grow flex flex-row">
@@ -93,7 +101,11 @@ const MessageSender = () => {
             </div>
           </div>
           <div className="flex w-8">
-            <IconSend size={16} stroke={2} />
+            <IconSend
+              size={16}
+              stroke={2}
+              onClick={() => props.sendContent(state.currentMessage)}
+            />
           </div>
         </div>
       </div>
