@@ -75,7 +75,29 @@ export interface IChatScreenState {
   mainContent: IMainContentProps;
   rightPanelProps: IRightPanelProps;
   leftBarProps: ILeftBarProps;
+  loading: boolean;
 }
+
+export const EmptyChatScreenState: IChatScreenState = {
+  mainContent: {
+    messages: [],
+    messageSenderProps: {
+      draftContent: "",
+      draftContentChanged: (arg) => {},
+      sendContent: (arg) => {},
+      placeHolderText: "",
+    },
+    channelName: "",
+    channelAvatar: "",
+    channelStatus: "",
+  },
+  rightPanelProps: { type: "NoZoomIn" },
+  leftBarProps: {
+    leftNavigationProps: { userName: "", status: "Away" },
+    sections: [],
+  },
+  loading: true,
+};
 
 interface ChatScreenInitiallyLoaded {
   type: "InitiallyLoaded";
@@ -85,14 +107,21 @@ interface ChatScreenInitiallyLoaded {
 }
 
 interface ChatScreenNavigateToChannel {
+  channelName: string;
   type: "NavigateToChannel";
+}
+interface ChatScreenChannelLoaded {
+  type: "ChannelLoaded";
+  mainContent: IMainContentProps;
 }
 
 interface ChatScreenZoomUser {
+  userName: string;
   type: "ZoomUser";
 }
 
 interface ChatScreenZoomThread {
+  threadId: string;
   type: "ZoomThread";
 }
 
@@ -100,4 +129,16 @@ export type ChatScreenEvent =
   | ChatScreenInitiallyLoaded
   | ChatScreenZoomThread
   | ChatScreenZoomUser
-  | ChatScreenNavigateToChannel;
+  | ChatScreenNavigateToChannel
+  | ChatScreenChannelLoaded;
+
+export interface IFetchChatStateForQueryRequest {
+  userId: string;
+  zoomedChannel: string;
+}
+
+export interface IFetchChatStateForQueryResponse {
+  mainContent: IMainContentProps;
+  rightPanelProps: IRightPanelProps;
+  leftBarProps: ILeftBarProps;
+}
