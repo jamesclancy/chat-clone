@@ -31,6 +31,11 @@ export interface IMainContentProps {
   messages: IMessageContentItemProps[];
 }
 
+export interface IMainContentContext {
+  currentUser: string;
+  dispatch: (e: ChatScreenEvent) => void;
+}
+
 export interface INoZoomIn {
   type: "NoZoomIn";
 }
@@ -56,9 +61,12 @@ export interface ILeftMenuLinkItemProps {
 }
 
 export interface ILeftMenuSectionProps {
+  id: string;
   items: ILeftMenuLinkItemProps[];
   name: string;
   expanded: boolean;
+  toggleExpansion: () => void;
+  clickAdd: () => void;
 }
 
 export interface ILeftNavigationUserPanelProps {
@@ -125,15 +133,20 @@ interface ChatScreenZoomThread {
   type: "ZoomThread";
 }
 
+interface ToggleLeftMenuExpansionEvent {
+  type: "ToggleLeftMenuExpansion";
+  sectionId: string;
+}
+
 export type ChatScreenEvent =
   | ChatScreenInitiallyLoaded
   | ChatScreenZoomThread
   | ChatScreenZoomUser
   | ChatScreenNavigateToChannel
-  | ChatScreenChannelLoaded;
+  | ChatScreenChannelLoaded
+  | ToggleLeftMenuExpansionEvent;
 
 export interface IFetchChatStateForQueryRequest {
-  userId: string;
   zoomedChannel: string;
 }
 

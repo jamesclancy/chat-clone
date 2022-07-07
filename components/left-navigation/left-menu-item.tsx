@@ -1,4 +1,4 @@
-import { ILeftMenuLinkItemProps } from "./models";
+import { ILeftMenuLinkItemProps } from "../../models/models";
 
 const LeftMenuItem = (props: ILeftMenuLinkItemProps) => {
   const MenuItemIcon = () => {
@@ -21,7 +21,7 @@ const LeftMenuItem = (props: ILeftMenuLinkItemProps) => {
 
   return (
     <li>
-      <div className={classes}>
+      <div className={classes} onClick={props.clickAction}>
         <div className="w-5">
           <MenuItemIcon />
         </div>

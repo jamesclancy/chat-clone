@@ -7,6 +7,7 @@ import {
   ChatScreenEvent,
   EmptyChatScreenState,
   IChatScreenState,
+  ILeftMenuSectionProps,
 } from "../models/models";
 import { useEffect, useReducer } from "react";
 import chatService from "../client-services/chat-service";
@@ -17,9 +18,14 @@ const Home: NextPage = () => {
     EmptyChatScreenState
   );
 
+  const context = { dispatch: dispatcher, currentUser: "my-name" };
+
   useEffect(() => {
     chatService
-      .loadChatView({ userId: "my-name", zoomedChannel: "random" })
+      .loadChatView(
+        context,
+        { zoomedChannel: "random" }
+      )
       .then((x) => {
         const mainContentProps = x.mainContent;
         const leftProps = x.leftBarProps;
@@ -50,13 +56,23 @@ const Home: NextPage = () => {
         };
       case "NavigateToChannel":
         const loadNewChannelPromise =
-          chatService.loadChannelDetailsForMainContent(action.channelName);
+          chatService.loadChannelDetailsForMainContent(context, action.channelName);
         loadNewChannelPromise.then((res) => {
           dispatcher({ type: "ChannelLoaded", mainContent: res });
         });
         return { ...state, loading: true };
       case "ChannelLoaded":
         return { ...state, loading: false, mainContent: action.mainContent };
+      case "ToggleLeftMenuExpansion":
+        const newSections = applyChangeToSections(
+          state.leftBarProps.sections,
+          action.sectionId,
+          (sec) => ({ ...sec, expanded: !sec.expanded })
+        );
+        return {
+          ...state,
+          leftBarProps: { ...state.leftBarProps, sections: newSections },
+        };
     }
 
     return state;
@@ -70,5 +86,23 @@ const Home: NextPage = () => {
     </div>
   );
 };
+
+function applyChangeToSections(
+  sections: ILeftMenuSectionProps[],
+  sectionKey: string,
+  sectionModification: (
+    previous: ILeftMenuSectionProps
+  ) => ILeftMenuSectionProps
+) {
+  let result: ILeftMenuSectionProps[] = [];
+
+  for (const section of sections) {
+    result.push(
+      section.id === sectionKey ? sectionModification(section) : section
+    );
+  }
+
+  return result;
+}
 
 export default Home;
