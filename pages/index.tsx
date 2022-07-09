@@ -21,24 +21,19 @@ const Home: NextPage = () => {
   const context = { dispatch: dispatcher, currentUser: "my-name" };
 
   useEffect(() => {
-    chatService
-      .loadChatView(
-        context,
-        { zoomedChannel: "random" }
-      )
-      .then((x) => {
-        const mainContentProps = x.mainContent;
-        const leftProps = x.leftBarProps;
-        const rightPanelProps = x.rightPanelProps;
+    chatService.loadChatView(context, { zoomedChannel: "random" }).then((x) => {
+      const mainContentProps = x.mainContent;
+      const leftProps = x.leftBarProps;
+      const rightPanelProps = x.rightPanelProps;
 
-        dispatcher({
-          type: "InitiallyLoaded",
+      dispatcher({
+        type: "InitiallyLoaded",
 
-          mainContent: mainContentProps,
-          leftBarProps: leftProps,
-          rightPanelProps,
-        });
+        mainContent: mainContentProps,
+        leftBarProps: leftProps,
+        rightPanelProps,
       });
+    });
   }, []);
 
   function processChatEvents(
@@ -55,12 +50,16 @@ const Home: NextPage = () => {
           rightPanelProps: action.rightPanelProps,
         };
       case "NavigateToChannel":
-        const loadNewChannelPromise =
-          chatService.loadChannelDetailsForMainContent(context, action.channelName);
-        loadNewChannelPromise.then((res) => {
-          dispatcher({ type: "ChannelLoaded", mainContent: res });
-        });
-        return { ...state, loading: true };
+        return performAsyncAndDispatchAfter(
+          state,
+          dispatcher,
+          () =>
+            chatService.loadChannelDetailsForMainContent(
+              context,
+              action.channelName
+            ),
+          (res) => ({ type: "ChannelLoaded", mainContent: res })
+        );
       case "ChannelLoaded":
         return { ...state, loading: false, mainContent: action.mainContent };
       case "ToggleLeftMenuExpansion":
@@ -72,6 +71,32 @@ const Home: NextPage = () => {
         return {
           ...state,
           leftBarProps: { ...state.leftBarProps, sections: newSections },
+        };
+      case "ZoomThread":
+        return performAsyncAndDispatchAfter(
+          state,
+          dispatcher,
+          () =>
+            chatService.loadRightPanelDetailsForRightContent(context, {
+              threadId: action.threadId,
+            }),
+          (res) => ({ type: "RightPanelLoaded", newRightPanel: res })
+        );
+      case "ZoomUser":
+        return performAsyncAndDispatchAfter(
+          state,
+          dispatcher,
+          () =>
+            chatService.loadRightPanelDetailsForRightContent(context, {
+              userName: action.userName,
+            }),
+          (res) => ({ type: "RightPanelLoaded", newRightPanel: res })
+        );
+      case "RightPanelLoaded":
+        return {
+          ...state,
+          rightPanelProps: action.newRightPanel,
+          loading: false,
         };
     }
 
@@ -86,6 +111,20 @@ const Home: NextPage = () => {
     </div>
   );
 };
+
+function performAsyncAndDispatchAfter<J>(
+  state: IChatScreenState,
+  dispatch: (e: ChatScreenEvent) => void,
+  promiseToExecute: () => Promise<J>,
+  dispatchMessageBuilder: (arg0: J) => ChatScreenEvent
+) {
+  const promise = promiseToExecute();
+  promise.then((res) => dispatch(dispatchMessageBuilder(res)));
+  return {
+    ...state,
+    loading: true,
+  };
+}
 
 function applyChangeToSections(
   sections: ILeftMenuSectionProps[],

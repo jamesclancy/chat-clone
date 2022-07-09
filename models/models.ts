@@ -133,6 +133,11 @@ interface ChatScreenZoomThread {
   type: "ZoomThread";
 }
 
+interface ChatScreenRightPanelLoaded {
+  type: "RightPanelLoaded";
+  newRightPanel: IRightPanelProps;
+}
+
 interface ToggleLeftMenuExpansionEvent {
   type: "ToggleLeftMenuExpansion";
   sectionId: string;
@@ -144,7 +149,8 @@ export type ChatScreenEvent =
   | ChatScreenZoomUser
   | ChatScreenNavigateToChannel
   | ChatScreenChannelLoaded
-  | ToggleLeftMenuExpansionEvent;
+  | ToggleLeftMenuExpansionEvent
+  | ChatScreenRightPanelLoaded;
 
 export interface IFetchChatStateForQueryRequest {
   zoomedChannel: string;
