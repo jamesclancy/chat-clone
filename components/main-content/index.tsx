@@ -14,7 +14,7 @@ const MainContent = (props: IMainContentProps) => {
           <div className="grow flex flex-row min-h-fit">
             <div className="flex grow flex-col">
               <div>
-                <h4>#{props.channelName}</h4>
+                <h4>#{props.channelSlug}</h4>
               </div>
               <div className="text-xs text-gray-400">{props.channelStatus}</div>
             </div>
@@ -26,10 +26,10 @@ const MainContent = (props: IMainContentProps) => {
             </div>
           </div>
         </div>
-        <div className="grow flex flex-col overflow-auto mt-2 mr-4">
-          {messages.map((message) => (
-            <MessageContentItem {...message} />
-          ))}
+        <div className="grow flex flex-col overflow-auto mt-2 mr-4 scrollbar">
+          {messages.map((message) => {
+            return <MessageContentItem {...message} />;
+          })}
         </div>
         <MessageSender {...props.messageSenderProps} />
       </div>

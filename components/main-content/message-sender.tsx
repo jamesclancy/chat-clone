@@ -39,7 +39,7 @@ const MessageSender = (props: IMessageSenderProps) => {
   } as IMessageSenderState);
   
   return (
-    <div className="flex py-2  mr-4">
+    <div className="flex py-2 mr-4">
       <div className="flex flex-col border-2 border-slate-300 rounded-xl flex-grow p-4 min-h-full">
         <div className="flex flex-row  align-middle text-sm h-6">
           <div className="w-4 h-4 align-middle text-center" aria-label="Bold">
@@ -73,7 +73,7 @@ const MessageSender = (props: IMessageSenderProps) => {
         </div>
         <div className="flex flex-grow">
           <textarea
-            className="flex-grow text-xs py-4 resize-none h-24"
+            className="flex-grow text-xs py-4 resize-none h-24 border-none  focus:ring-0"
             placeholder={props.placeHolderText}
           >{state.currentMessage}</textarea>
         </div>

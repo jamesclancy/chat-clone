@@ -1,4 +1,4 @@
-import { IMessageContentItemProps, IReplySummary } from "./models";
+import { IMessageContentItemProps, IReplySummary } from "../../models/models";
 
 const selectReplySummariesForDisplay = (x: IReplySummary[], y: IReplySummary) =>
   x.findIndex((p) => p.userName === y.userName) > -1 ? x : [...x, y];
@@ -9,7 +9,7 @@ const MessageContentItem = (props: IMessageContentItemProps) => {
       className="flex flex-row text-sm mt-4"
       key={`message_main_window_${props.id}`}
     >
-      <div className="w-12 min-w-fit">
+      <div className="w-12 min-w-fit" onClick={() => props.zoomToUser()}>
         <img
           src={props.createUserAvatar}
           className="fill-current rounded-full w-12 h-12"
@@ -17,7 +17,9 @@ const MessageContentItem = (props: IMessageContentItemProps) => {
       </div>
       <div className="flex-grow ml-4">
         <div className="flex flex-row grow">
-          <div className="font-bold">{props.createUser}</div>
+          <div className="font-bold" onClick={() => props.zoomToUser()}>
+            {props.createUser}
+          </div>
           <div>
             <span className="inline-block w-2 h-2 mx-2 bg-green-600 rounded-full"></span>
           </div>
@@ -33,13 +35,13 @@ const MessageContentItem = (props: IMessageContentItemProps) => {
                   <img src={x.userAvatar} className="fill-current rounded" />
                 </div>
               ))}
-            <a onClick={props.navigateToThread}>
+            <a onClick={() => props.zoomToThread()}>
               {props.replies.length} Replies
             </a>
           </div>
         )}
         {!props.replies?.length && (
-          <div onClick={props.navigateToThread}>Add Reply</div>
+          <div onClick={() => props.zoomToThread()}>Add Reply</div>
         )}
       </div>
     </div>

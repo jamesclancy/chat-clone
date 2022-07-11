@@ -6,14 +6,15 @@ import {
 
 const getLeftMenuProps = async (context: IMainContentContext) => {
   const buildNavigateSectionToggleAction = (sectionId: string) => () => {
-    context.dispatch({ type: "ToggleLeftMenuExpansion", sectionId });
+    context.dispatch({ type: "ToggleLeftMenuExpansion", sectionId, context });
   };
   const buildNavigateChannelAction = (channelName: string) => () =>
-    context.dispatch({ type: "NavigateToChannel", channelName });
+    context.dispatch({ type: "NavigateToChannel", channelName, context });
   const buildNavigateToUserChannelAction = (channelName: string) => () =>
     context.dispatch({
       type: "NavigateToChannel",
       channelName: `${context.currentUser}_${channelName}`,
+      context,
     });
 
   const panels: ILeftMenuSectionProps[] = [

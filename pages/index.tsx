@@ -9,7 +9,7 @@ import {
   IChatScreenState,
   ILeftMenuSectionProps,
 } from "../models/models";
-import { useEffect, useReducer } from "react";
+import { Dispatch, useEffect, useReducer } from "react";
 import chatService from "../client-services/chat-service";
 
 const Home: NextPage = () => {
@@ -32,89 +32,27 @@ const Home: NextPage = () => {
         mainContent: mainContentProps,
         leftBarProps: leftProps,
         rightPanelProps,
+        context,
       });
     });
   }, []);
 
-  function processChatEvents(
-    state: IChatScreenState,
-    action: ChatScreenEvent
-  ): IChatScreenState {
-    switch (action.type) {
-      case "InitiallyLoaded":
-        return {
-          ...state,
-          loading: false,
-          mainContent: action.mainContent,
-          leftBarProps: action.leftBarProps,
-          rightPanelProps: action.rightPanelProps,
-        };
-      case "NavigateToChannel":
-        return performAsyncAndDispatchAfter(
-          state,
-          dispatcher,
-          () =>
-            chatService.loadChannelDetailsForMainContent(
-              context,
-              action.channelName
-            ),
-          (res) => ({ type: "ChannelLoaded", mainContent: res })
-        );
-      case "ChannelLoaded":
-        return { ...state, loading: false, mainContent: action.mainContent };
-      case "ToggleLeftMenuExpansion":
-        const newSections = applyChangeToSections(
-          state.leftBarProps.sections,
-          action.sectionId,
-          (sec) => ({ ...sec, expanded: !sec.expanded })
-        );
-        return {
-          ...state,
-          leftBarProps: { ...state.leftBarProps, sections: newSections },
-        };
-      case "ZoomThread":
-        return performAsyncAndDispatchAfter(
-          state,
-          dispatcher,
-          () =>
-            chatService.loadRightPanelDetailsForRightContent(context, {
-              threadId: action.threadId,
-            }),
-          (res) => ({ type: "RightPanelLoaded", newRightPanel: res })
-        );
-      case "ZoomUser":
-        return performAsyncAndDispatchAfter(
-          state,
-          dispatcher,
-          () =>
-            chatService.loadRightPanelDetailsForRightContent(context, {
-              userName: action.userName,
-            }),
-          (res) => ({ type: "RightPanelLoaded", newRightPanel: res })
-        );
-      case "RightPanelLoaded":
-        return {
-          ...state,
-          rightPanelProps: action.newRightPanel,
-          loading: false,
-        };
-    }
-
-    return state;
-  }
-
   return (
-    <div className="flex flex-row grow  min-h-screen">
+    <div className="flex flex-row grow min-h-screen ">
       <LeftNavigation {...state.leftBarProps} />
-      <MainContent {...state.mainContent} />
-      <RightPanel {...state.rightPanelProps} />
+      <div className=" max-h-screen flex flex-col lg:flex-row-reverse grow overflow-y-hidden">
+        <RightPanel {...state.rightPanelProps} />{" "}
+        <MainContent {...state.mainContent} />
+      </div>
     </div>
   );
 };
 
+export default Home;
+
 function performAsyncAndDispatchAfter<J>(
   state: IChatScreenState,
-  dispatch: (e: ChatScreenEvent) => void,
+  dispatch: Dispatch<ChatScreenEvent>,
   promiseToExecute: () => Promise<J>,
   dispatchMessageBuilder: (arg0: J) => ChatScreenEvent
 ) {
@@ -144,4 +82,81 @@ function applyChangeToSections(
   return result;
 }
 
-export default Home;
+function processChatEvents(
+  state: IChatScreenState,
+  action: ChatScreenEvent
+): IChatScreenState {
+  switch (action.type) {
+    case "InitiallyLoaded":
+      return {
+        ...state,
+        loading: false,
+        mainContent: action.mainContent,
+        leftBarProps: action.leftBarProps,
+        rightPanelProps: action.rightPanelProps,
+      };
+    case "NavigateToChannel":
+      return performAsyncAndDispatchAfter(
+        state,
+        action.context.dispatch,
+        () =>
+          chatService.loadChannelDetailsForMainContent(
+            action.context,
+            action.channelName
+          ),
+        (res) => ({
+          type: "ChannelLoaded",
+          mainContent: res,
+          context: action.context,
+        })
+      );
+    case "ChannelLoaded":
+      return { ...state, loading: false, mainContent: action.mainContent };
+    case "ToggleLeftMenuExpansion":
+      const newSections = applyChangeToSections(
+        state.leftBarProps.sections,
+        action.sectionId,
+        (sec) => ({ ...sec, expanded: !sec.expanded })
+      );
+      return {
+        ...state,
+        leftBarProps: { ...state.leftBarProps, sections: newSections },
+      };
+    case "ZoomThread":
+      return performAsyncAndDispatchAfter(
+        state,
+        action.context.dispatch,
+        () =>
+          chatService.loadRightPanelDetailsForRightContent(action.context, {
+            threadId: action.threadId,
+          }),
+        (res) => ({
+          type: "RightPanelLoaded",
+          newRightPanel: res,
+          context: action.context,
+        })
+      );
+    case "ZoomUser":
+      return performAsyncAndDispatchAfter(
+        state,
+        action.context.dispatch,
+        () =>
+          chatService.loadRightPanelDetailsForRightContent(action.context, {
+            userName: action.userName,
+          }),
+        (res) => ({
+          type: "RightPanelLoaded",
+          newRightPanel: res,
+          context: action.context,
+        })
+      );
+    case "RightPanelLoaded":
+      return {
+        ...state,
+        rightPanelProps: action.newRightPanel,
+        loading: false,
+      };
+  }
+
+  return state;
+}

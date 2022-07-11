@@ -6,10 +6,11 @@ import {
   IMessageSenderProps,
   IReplySummary,
 } from "../models/models";
+import getLeftMenuProps from "./left-command-panel-builder-service";
 
 async function getMainContentProps(
   context: IMainContentContext,
-  channelName: string
+  channelSlug: string
 ): Promise<IMainContentProps> {
   //const channelName: string = channelName;
   const channelStatus: string = "A place for random messages";
@@ -29,16 +30,10 @@ async function getMainContentProps(
       });
     }
 
-    const newUserName = faker.internet.userName();
-    const threadId = faker.random.alphaNumeric(25);
+    const newUserName = faker.internet.userName().toString();
+    const threadId = faker.random.alphaNumeric(25).toString();
 
-    messages.push({
-      zoomToUser: () => {
-        context.dispatch({ type: "ZoomUser", userName: newUserName });
-      },
-      zoomToThread: () => {
-        context.dispatch({ type: "ZoomThread", threadId: threadId });
-      },
+    const messageProps: IMessageContentItemProps = {
       createDate: faker.date.past(),
       createUser: newUserName,
       createUserStatus: "Online",
@@ -46,24 +41,36 @@ async function getMainContentProps(
       messageContent: faker.lorem.paragraphs(),
       replies: replies,
       id: threadId,
-    });
+      zoomToUser: function (this: IMessageContentItemProps) {
+        context.dispatch({
+          type: "ZoomUser",
+          userName: this.createUser,
+          context,
+        });
+      },
+      zoomToThread: function (this: IMessageContentItemProps) {
+        context.dispatch({ type: "ZoomThread", threadId: this.id, context });
+      },
+    };
+
+    messages.push(messageProps);
   }
 
   var messageSenderProps: IMessageSenderProps = {
-    placeHolderText: `Message #${channelName}`,
+    placeHolderText: `Message #${channelSlug}`,
     draftContent: "",
     draftContentChanged: function (newContent: string): void {
-      console.log(newContent);
+      context.dispatch({type:'SaveChannelMessageDraft', channelSlug: channelSlug, newContent, user: context.currentUser });
     },
     sendContent: function (newContent: string): void {
-      console.log(newContent);
+      context.dispatch({type:'SendChannelMessage', channelSlug: channelSlug, newContent, user: context.currentUser });
     },
   };
 
   return {
     messages,
     messageSenderProps,
-    channelName,
+    channelSlug: channelSlug,
     channelAvatar,
     channelStatus,
   };
